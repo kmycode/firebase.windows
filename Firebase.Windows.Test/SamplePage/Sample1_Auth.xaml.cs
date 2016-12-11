@@ -29,49 +29,66 @@ namespace Firebase.Windows.Test.SamplePage
 
 		private void FirebaseTest()
 		{
-			this.SignIn();
+			//this.SignIn();
 			//this.SignOut();
 		}
 
 		private async void SignIn()
 		{
+			// auth with twitter
 			//var promise = await FirebaseApp.Default.Auth().SignInWithTwitterAsync();
+
+			// create new user with email-password
 			//var promise = FirebaseApp.Default.Auth().CreateUserWithEmailAndPassword("___", "Asuka786");
+
+			// sign in with email-password
 			//var promise = FirebaseApp.Default.Auth().SignInWithEmailAndPassword("___", "Asuka786");
-			var promise = FirebaseApp.Default.Auth().SignInAnonymously();//FirebaseApp.Default.Auth().GetEmailAndPasswordCredential("___", "Asuka786");
-			//var promise = credential.SignIn();
-			promise.Rejected += (sender, e) => this.Dispatcher.Invoke(() => this.TestLabel.Content = "認証失敗: " + e.ErrorCode);
-			promise.Resolved += async (sender, e) =>
-			{
 
-				//var data = FirebaseApp.Default.Auth().CurrentUser.ProviderDatas;
-			};
+			// sign in anonymously
+			var promise = FirebaseApp.Default.Auth().SignInAnonymously();
+
+			// set promise event
+			promise.Rejected += (sender, e) => this.Dispatcher.Invoke(() => this.TestLabel.Content = "Auth failed: " + e.ErrorCode);
+			promise.Resolved += (sender, e) => this.Dispatcher.Invoke(() => this.TestLabel.Content = "Auth success");
+
+			// start receiving callbacks
 			promise.StartReceiving();
-
 			promise.WaitForStatusChanged();
+
+			// return if auth promise failed
 			if (!promise.IsResolve) return;
 
+			// display current user name
 			this.Dispatcher.Invoke(() => this.TestLabel.Content = FirebaseApp.Default.Auth().CurrentUser.DisplayName);
 		}
 
+		// see https://firebase.google.com/docs/auth/web/account-linking
 		private async void Link()
 		{
+			// get new credential
 			var newCredential = await FirebaseApp.Default.Auth().GetTwitterCredentialAsync();
+
+			// try link accounts
 			var linkPromise = FirebaseApp.Default.Auth().CurrentUser.Link(newCredential);
+
+			// set link callbacks
 			linkPromise.Resolved += (ss, ee) =>
 			{
-				this.Dispatcher.Invoke(() => this.TestLabel.Content = "リンク成功");
+				this.Dispatcher.Invoke(() => this.TestLabel.Content = "Success to link");
 			};
 			linkPromise.Rejected += (ss, ee) =>
 			{
-				this.Dispatcher.Invoke(() => this.TestLabel.Content = "リンク失敗: " + ee.ErrorCode);
+				this.Dispatcher.Invoke(() => this.TestLabel.Content = "Link failed: " + ee.ErrorCode);
 				FirebaseApp.Default.Auth().CurrentUser.Delete();
 			};
+
+			// start receiving callbacks
 			linkPromise.StartReceiving();
 		}
 
 		private void SignOut()
 		{
+			// sign out
 			var promise = FirebaseApp.Default.Auth().SignOut();
 			promise.Rejected += (sender, e) => this.Dispatcher.Invoke(() => this.TestLabel.Content = "サインアウト失敗: " + e.ErrorCode);
 			promise.Resolved += (sender, e) => this.Dispatcher.Invoke(() => this.TestLabel.Content = "サインアウトに成功しました");

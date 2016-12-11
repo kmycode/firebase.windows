@@ -68,6 +68,9 @@
     <Compile Include="Database\FirebaseQuery.cs" />
     <Compile Include="Exceptions\Exceptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Storage\FirebaseStorage.cs" />
+    <Compile Include="Storage\FirebaseStorageReference.cs" />
+    <Compile Include="Storage\FirebaseUploadTask.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

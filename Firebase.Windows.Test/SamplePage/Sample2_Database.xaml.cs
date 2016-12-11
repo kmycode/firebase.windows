@@ -25,40 +25,54 @@ namespace Firebase.Windows.Test.SamplePage
 		{
 			InitializeComponent();
 
-			if (this.SignIn())
+			//if (this.SignIn())
 			{
-				this.TestLabel.Content = FirebaseApp.Default.Auth().CurrentUser.DisplayName;
-
-				this.SetData();
-				this.GetData();
+				//this.SetData();
+				//this.GetData();
 			}
 		}
 
 		private bool SignIn()
 		{
-			//var promise = FirebaseApp.Default.Auth().CreateUserWithEmailAndPassword("test@example.com", "Asuka786");
+			// auth
 			var promise = FirebaseApp.Default.Auth().SignInWithEmailAndPassword("test@example.com", "Asuka786");
 			promise.Rejected += (sender, e) => this.Dispatcher.Invoke(() => this.TestLabel.Content = "認証失敗: " + e.ErrorCode);
 			promise.StartReceiving();
 			promise.WaitForStatusChanged();
-
 			return FirebaseApp.Default.Auth().CurrentUser != null;
 		}
 
 		private void SetData()
 		{
+			// get database object
 			var db = FirebaseApp.Default.Database();
+
+			// get database path reference
 			var dbref = db.Ref("dbtest/data");
+
+			// set string data
 			//dbref.Set("WPFからのテストだよ！");
-			dbref.Set(new TestStruct { Text = "WPFから構造体をもっていきました", Number = 32 });
+
+			// set structure data
+			dbref.Set(new TestStruct { Text = "Hello, Firebase Database!", Number = 32 });
+
+			// push structure data to array
+			// dbref.Push(new TestStruct { Text = "Hello, Firebase Database!", Number = 32 });
 		}
 
 		private async void GetData()
 		{
+			// get database object
 			var db = FirebaseApp.Default.Database();
+
+			// get database path reference
 			var dbref = db.Ref("dbtest/data");
-			//this.TestLabel.Content = (await dbref.GetObjectsAsync<TestStruct>())[0].Text;		// push
-			this.TestLabel.Content = (await dbref.GetObjectAsync<TestStruct>()).Text;		// set
+
+			// get data (was set 'Set' method) and display
+			this.TestLabel.Content = (await dbref.GetObjectAsync<TestStruct>()).Text;
+
+			// get datas array (were set 'Put' method) and display
+			//this.TestLabel.Content = (await dbref.GetObjectsAsync<TestStruct>())[0].Text;
 		}
 
 		struct TestStruct

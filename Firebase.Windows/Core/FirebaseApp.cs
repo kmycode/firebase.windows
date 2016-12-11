@@ -8,6 +8,7 @@ using Firebase.Windows.Auth;
 using Firebase.Windows.Common;
 using Firebase.Windows.Database;
 using Firebase.Windows.Exceptions;
+using Firebase.Windows.Storage;
 
 namespace Firebase.Windows.Core
 {
@@ -161,9 +162,9 @@ namespace Firebase.Windows.Core
 			return new FirebaseDatabase(this.Reference.InvokeMethodToReference("database"));
 		}
 
-		public object Storage()
+		public FirebaseStorage Storage()
 		{
-			throw new NotImplementedException();
+			return new FirebaseStorage(this.Reference.InvokeMethodToReference("storage"));
 		}
 
 		public void Dispose()

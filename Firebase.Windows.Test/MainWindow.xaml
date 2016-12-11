@@ -7,5 +7,5 @@
         xmlns:sample="clr-namespace:Firebase.Windows.Test.SamplePage"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
-    <sample:Sample2_Database/>
+    <sample:Sample3_Storage/>
 </Window>

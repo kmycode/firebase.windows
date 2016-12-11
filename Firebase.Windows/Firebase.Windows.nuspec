@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>KMY.Firebase.Windows</id>
+    <version>1.0.0 -alpha1</version>
+    <title>Firebase for Windows (.NET)</title>
+    <authors>KMY</authors>
+    <owners>KMY</owners>
+    <licenseUrl>https://github.com/kmycode/firebase.windows/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/kmycode/firebase.windows</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>.NET library for Google Firebase (Auth, Database and Storage) with WPF/Windows Desktop app.</description>
+    <releaseNotes>First publish</releaseNotes>
+    <copyright>Copyright 2016 KMY</copyright>
+    <tags>C# WPF Firebase Cloud</tags>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="9.0.1" />
+      <dependency id="Selenium.Support" version="3.0.1" />
+      <dependency id="Selenium.WebDriver" version="3.0.1" />
+    </dependencies>
+  </metadata>
+</package>

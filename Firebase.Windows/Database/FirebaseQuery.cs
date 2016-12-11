@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -203,6 +204,116 @@ namespace Firebase.Windows.Database
 		public FirebaseQuery OrderByValue()
 		{
 			return new FirebaseQuery(this.Reference.InvokeMethodToReference("orderByValue"));
+		}
+
+		/// <summary>
+		/// handle once value changed event
+		/// </summary>
+		/// <returns>Firebase promise callbacks</returns>
+		internal FirebasePromise Once()
+		{
+			return new FirebasePromise(this.Reference.InvokeMethodToReference("once", "'value'"));
+		}
+
+		/// <summary>
+		/// Get value at this reference
+		/// </summary>
+		/// <returns>database reference value</returns>
+		public async Task<string> GetStringAsync()
+		{
+			string result = null;
+			var promise = this.Once();
+			promise.Resolved += (sender, e) => result = e.Reference.InvokeMethodToReference("val").GetValue();
+			promise.StartReceiving();
+			await promise.WaitForStatusChangedAsync();
+
+			return result;
+		}
+
+		/// <summary>
+		/// Get value at this reference
+		/// </summary>
+		/// <returns>database reference value</returns>
+		public async Task<int> GetIntegerAsync()
+		{
+			int result = 0;
+			var promise = this.Once();
+			promise.Resolved += (sender, e) => result = int.Parse(e.Reference.InvokeMethodToReference("val").GetValue());
+			promise.StartReceiving();
+			await promise.WaitForStatusChangedAsync();
+
+			return result;
+		}
+
+		/// <summary>
+		/// Get value at this reference
+		/// </summary>
+		/// <returns>database reference value</returns>
+		public async Task<double> GetDoubleAsync()
+		{
+			double result = 0;
+			var promise = this.Once();
+			promise.Resolved += (sender, e) => result = double.Parse(e.Reference.InvokeMethodToReference("val").GetValue());
+			promise.StartReceiving();
+			await promise.WaitForStatusChangedAsync();
+
+			return result;
+		}
+
+		/// <summary>
+		/// Get value at this reference
+		/// </summary>
+		/// <returns>database reference value</returns>
+		public async Task<bool> GetBoolAsync()
+		{
+			bool result = false;
+			var promise = this.Once();
+			promise.Resolved += (sender, e) => result = bool.Parse(e.Reference.InvokeMethodToReference("val").GetValue());
+			promise.StartReceiving();
+			await promise.WaitForStatusChangedAsync();
+
+			return result;
+		}
+
+		/// <summary>
+		/// Get value at this reference
+		/// </summary>
+		/// <returns>database reference value</returns>
+		public async Task<T> GetObjectAsync<T>()
+		{
+			T result = default(T);
+			var promise = this.Once();
+			promise.Resolved += (sender, e) =>
+			{
+				var value = e.Reference.InvokeMethodToReference("val");
+				result = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(value.GetJsonValue());
+			};
+			promise.StartReceiving();
+			await promise.WaitForStatusChangedAsync();
+
+			return result;
+		}
+
+		/// <summary>
+		/// Get value at this reference
+		/// </summary>
+		/// <returns>database reference value</returns>
+		public async Task<Collection<T>> GetObjectsAsync<T>()
+		{
+			Collection<T> result = new Collection<T>();
+			var promise = this.Once();
+			promise.Resolved += (sender, e) =>
+			{
+				var values = e.Reference.InvokeMethodToArrayFromJson("val");
+				foreach (var value in values)
+				{
+					result.Add(Newtonsoft.Json.JsonConvert.DeserializeObject<T>(value.GetJsonValue()));
+				}
+			};
+			promise.StartReceiving();
+			await promise.WaitForStatusChangedAsync();
+
+			return result;
 		}
 
 		/// <summary>

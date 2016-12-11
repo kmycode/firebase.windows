@@ -49,6 +49,19 @@ namespace Firebase.Windows.Common
 			this.JSBinding.ExecuteScript("variables." + this.VariableName + " = " + valueScript + ";");
 		}
 
+		internal void SetBlob(byte[] data)
+		{
+			StringBuilder sb = new StringBuilder();
+			foreach (byte b in data)
+			{
+				sb.Append(",");
+				sb.Append(b);
+			}
+			sb.Remove(0, 1);            // first ','
+
+			this.SetValue("new Blob([new Uint8Array([" + sb.ToString() + "])])");
+		}
+
 		/// <summary>
 		/// Get Script object such as string
 		/// </summary>

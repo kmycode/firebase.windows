@@ -79,7 +79,9 @@ namespace Firebase.Windows.Common
 		/// <returns>Script result</returns>
 		internal object ExecuteScript(string script)
 		{
+#if DEBUG
 			System.Diagnostics.Debug.WriteLine(script);
+#endif
 			return this._javaScriptExecutor.ExecuteScript(script);
 		}
 
