@@ -33,8 +33,8 @@ Next, go Firebase console and [Authentication] -> [Sign-in Method] -> [OAuth Red
 
 You must put one or two exe file(s) on same path of your application.
 
-1. [PhantomJS](http://phantomjs.org/)
-1. [Selenium Google Chrome Driver](http://www.seleniumhq.org/download/) if you use Twitter, Facebook and GitHub authentications.
+1. [PhantomJS](http://phantomjs.org/) - "phantomjs.exe"
+1. [Selenium Google Chrome Driver](http://www.seleniumhq.org/download/) - "chromedriver.exe" if you use Twitter, Facebook and GitHub authentications.
 
 Put those file to bin\Debug directory.
 
