@@ -4,12 +4,12 @@ Firebase for Windows (for example WPF) It will support Auth, Database and Storag
 現状でできることは以下のとおりです
 
 * WPFからFirebaseを利用
-* Email-Password、Twitter、Facebook、GitHub、匿名認証、サインアウト
+* Auth（Email-Password、Twitter、Facebook、GitHub、匿名認証、サインアウト、アカウントのリンク、プロフィール変更など）
+* Database（データのセット、プッシュ、取得（文字列、数値、浮動小数点数、任意のオブジェクトに対応）、Queryを使った簡単な操作）
 
-これから作りたいなと思ってるのは以下のとおりです
+まだ実装されていない機能は以下のとおりです
 
-* 認証まわりを強化
-* Database
+* Databaseのトランザクション（後回し）
 * Storage
 
 nugetパッケージ以外にも必要なものがいくつかあって、説明しないと多分誰も実行できないと思いますｺﾞﾒﾝﾅｻｲ
