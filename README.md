@@ -58,6 +58,8 @@ FirebaseApp.InitializeApp(new FirebaseAppOptions
 
 ## Addtional informations (Japanese)
 
+[Qiitaに説明記事をあげています](http://qiita.com/askyq/items/91269544fd2e4d9c18bc)
+
 現状でできることは以下のとおりです
 
 * WPFからFirebaseを利用
@@ -71,9 +73,3 @@ FirebaseApp.InitializeApp(new FirebaseAppOptions
 * StorageのMetaDataとか
 * Database、Storageのon、offなど、各種イベントの処理
 * その他細かいところ
-
-nugetパッケージ以外にも必要なものがいくつかあって、説明しないと多分誰も実行できないと思いますｺﾞﾒﾝﾅｻｲ
-
-使い方の説明などは、12月24日にQiitaでまとめて公開する予定なので、どうかそれまでお待ちを(´・ω・｀)
-
-12月24日までに急いで作らないといけないんだ
