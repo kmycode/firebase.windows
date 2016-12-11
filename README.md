@@ -1,6 +1,8 @@
 # firebase.windows
 Firebase for Windows (for example WPF) It will support Auth, Database and Storage.
 
+for Japanese: [Qiitaに説明記事をあげています](http://qiita.com/askyq/items/91269544fd2e4d9c18bc)
+
 ## Getting started
 
 ### Prepare Firebase account
@@ -34,7 +36,7 @@ Next, go Firebase console and [Authentication] -> [Sign-in Method] -> [OAuth Red
 You must put one or two exe file(s) on same path of your application.
 
 1. [PhantomJS](http://phantomjs.org/) - "phantomjs.exe"
-1. [Selenium Google Chrome Driver](http://www.seleniumhq.org/download/) - "chromedriver.exe" if you use Twitter, Facebook and GitHub authentications.
+1. [Selenium Google Chrome Driver](https://sites.google.com/a/chromium.org/chromedriver/) - "chromedriver.exe" if you use Twitter, Facebook and GitHub authentications.
 
 Put those file to bin\Debug directory.
 
@@ -50,6 +52,13 @@ FirebaseApp.InitializeApp(new FirebaseAppOptions
 	MessagingSenderId = "<your id>",
 	FirebaseHtmlUrl = "<your dummy HTML url>",
 });
+```
+
+### Write cleanup code when app exited
+
+```csharp
+// MainWindow.xaml.cs
+this.Closed += (sender, e) => FirebaseApp.Default.Dispose();
 ```
 
 ### Read sample codes and run!
