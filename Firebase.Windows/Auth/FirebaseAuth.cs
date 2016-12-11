@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Firebase.Windows.Common;
 using Firebase.Windows.Core;
+using Firebase.Windows.Exceptions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
@@ -197,13 +198,23 @@ namespace Firebase.Windows.Auth
 			)
 		{
 			var options = this.App.Options;
-			options.IsPrivateApp = true;			// struct
+			options.IsPrivateApp = true;            // struct
 
 			// make chrome browser driver
-			var driverService = ChromeDriverService.CreateDefaultService();
-			driverService.HideCommandPromptWindow = true;
-			var driver = new ChromeDriver(driverService, new ChromeOptions());
-			var jsbinding = new JavaScriptBinding(options.FirebaseHtmlUrl, driver);
+			ChromeDriverService driverService = null;
+			ChromeDriver driver = null;
+			JavaScriptBinding jsbinding = null;
+			try
+			{
+				driverService = ChromeDriverService.CreateDefaultService();
+				driverService.HideCommandPromptWindow = true;
+				driver = new ChromeDriver(driverService, new ChromeOptions());
+				jsbinding = new JavaScriptBinding(options.FirebaseHtmlUrl, driver);
+			}
+			catch (Exception e)
+			{
+				throw new ChromeBrowserException("Cannot operate Google Chrome browser because of any reasons.", e);
+			}
 
 			// create app before auth
 			var beforeAuthApp = new FirebaseApp(options, jsbinding);
@@ -213,40 +224,55 @@ namespace Firebase.Windows.Auth
 			jsbinding.ExecuteScript("firebase.auth().signInWithRedirect(variables.provider);");
 
 			// monitor url changes and back
-			string currentUrl = null;
-			bool isServiceAuthPageAccessed = false;
-			while (true)
+			try
 			{
-				if (currentUrl != driver.Url)
+				string currentUrl = null;
+				bool isServiceAuthPageAccessed = false;
+				while (true)
 				{
-					currentUrl = driver.Url;
-					if (!isServiceAuthPageAccessed)
+					if (currentUrl != driver.Url)
 					{
-						if (currentUrl.Contains(serviceDomanin) && currentUrl.StartsWith("https://"))
+						currentUrl = driver.Url;
+						if (!isServiceAuthPageAccessed)
 						{
-							isServiceAuthPageAccessed = true;
+							if (currentUrl.Contains(serviceDomanin) && currentUrl.StartsWith("https://"))
+							{
+								isServiceAuthPageAccessed = true;
+							}
+						}
+						else
+						{
+							if (currentUrl == options.FirebaseHtmlUrl)
+							{
+								break;
+							}
 						}
 					}
-					else
-					{
-						if (currentUrl == options.FirebaseHtmlUrl)
-						{
-							break;
-						}
-					}
+					await Task.Delay(10);
 				}
-				await Task.Delay(10);
+			}
+			catch (Exception e)
+			{
+				throw new ChromeBrowserWaitingAuthException("Cannot operate Chrome browser. Do you close browser handly?", e);
 			}
 
-			// wait for end of load
-			WebDriverWait wait = new WebDriverWait(driver, new TimeSpan(0, 0, 30));
-			wait.Until(wd => (string)((IJavaScriptExecutor)wd).ExecuteScript("return document.readyState") == "complete");
+			FirebasePromise authPromise = null;
+			try
+			{
+				// wait for end of load
+				WebDriverWait wait = new WebDriverWait(driver, new TimeSpan(0, 0, 30));
+				wait.Until(wd => (string)((IJavaScriptExecutor)wd).ExecuteScript("return document.readyState") == "complete");
 
-			// get promiss object
-			var afterAuthApp = new FirebaseApp(options, jsbinding);
-			jsbinding.ExecuteScript("variables.promise = firebase.auth().getRedirectResult()");
-			var authPromissReference = new JavaScriptObjectReference(jsbinding, "promise");
-			var authPromise = new FirebasePromise(authPromissReference);
+				// get promiss object
+				var afterAuthApp = new FirebaseApp(options, jsbinding);
+				jsbinding.ExecuteScript("variables.promise = firebase.auth().getRedirectResult()");
+				var authPromissReference = new JavaScriptObjectReference(jsbinding, "promise");
+				authPromise = new FirebasePromise(authPromissReference);
+			}
+			catch (Exception e)
+			{
+				throw new ChromeBrowserWaitingAuthResultException("Cannot get auth result by Chrome browser. Do you close browser handly? Browser will be closed automatic.", e);
+			}
 
 			// promise received flag
 			bool isAuthStatusChanged = false;
@@ -256,18 +282,17 @@ namespace Firebase.Windows.Auth
 			authPromise.Resolved += (sender, e) =>
 			{
 				credential = credentialGetter(e);
-
-				//var promiseReference = new JavaScriptObjectReference();
-				//promiseReference.SetValue($"firebase.auth().signInWithCredential(variables.{credential.VariableName})");
-				//promise = new FirebasePromise(promiseReference);
-
 				isAuthStatusChanged = true;
+
+				// close chrome browser
 				driver.Dispose();
 			};
 
 			authPromise.Rejected += (sender, e) =>
 			{
 				isAuthStatusChanged = true;
+
+				// close chrome browser
 				driver.Dispose();
 			};
 
@@ -281,7 +306,7 @@ namespace Firebase.Windows.Auth
 				if (!driverService.IsRunning)
 				{
 					isAuthStatusChanged = true;
-					return null;
+					throw new ChromeBrowserWaitingAuthResultException("Cannot connect Chrome browser.");
 				}
 
 				await Task.Delay(10);

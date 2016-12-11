@@ -12,7 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Firebase.Windows.Common;
 using Firebase.Windows.Core;
+using Firebase.Windows.Exceptions;
 
 namespace Firebase.Windows.Test.SamplePage
 {
@@ -29,14 +31,26 @@ namespace Firebase.Windows.Test.SamplePage
 
 		private void FirebaseTest()
 		{
-			//this.SignIn();
+			this.SignIn();
 			//this.SignOut();
 		}
 
 		private async void SignIn()
 		{
 			// auth with twitter
-			//var promise = await FirebaseApp.Default.Auth().SignInWithTwitterAsync();
+			FirebasePromise promise = null;
+			try
+			{
+				promise = await FirebaseApp.Default.Auth().SignInWithTwitterAsync();
+			}
+			catch (ChromeBrowserException e)
+			{
+				return;
+			}
+			catch (JavaScriptBindingException e)
+			{
+				return;
+			}
 
 			// create new user with email-password
 			//var promise = FirebaseApp.Default.Auth().CreateUserWithEmailAndPassword("___", "Asuka786");
@@ -45,21 +59,17 @@ namespace Firebase.Windows.Test.SamplePage
 			//var promise = FirebaseApp.Default.Auth().SignInWithEmailAndPassword("___", "Asuka786");
 
 			// sign in anonymously
-			var promise = FirebaseApp.Default.Auth().SignInAnonymously();
+			//var promise = FirebaseApp.Default.Auth().SignInAnonymously();
 
 			// set promise event
 			promise.Rejected += (sender, e) => this.Dispatcher.Invoke(() => this.TestLabel.Content = "Auth failed: " + e.ErrorCode);
-			promise.Resolved += (sender, e) => this.Dispatcher.Invoke(() => this.TestLabel.Content = "Auth success");
+			promise.Resolved += (sender, e) =>
+			{
+				this.Dispatcher.Invoke(() => this.TestLabel.Content = "Auth success");
+			};
 
 			// start receiving callbacks
 			promise.StartReceiving();
-			promise.WaitForStatusChanged();
-
-			// return if auth promise failed
-			if (!promise.IsResolve) return;
-
-			// display current user name
-			this.Dispatcher.Invoke(() => this.TestLabel.Content = FirebaseApp.Default.Auth().CurrentUser.DisplayName);
 		}
 
 		// see https://firebase.google.com/docs/auth/web/account-linking

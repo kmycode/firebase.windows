@@ -25,10 +25,10 @@ namespace Firebase.Windows.Test.SamplePage
 		{
 			InitializeComponent();
 
-			//if (this.SignIn())
+			if (this.SignIn())
 			{
 				//this.SetData();
-				//this.GetData();
+				this.GetData();
 			}
 		}
 
@@ -66,7 +66,7 @@ namespace Firebase.Windows.Test.SamplePage
 			var db = FirebaseApp.Default.Database();
 
 			// get database path reference
-			var dbref = db.Ref("dbtest/data");
+			var dbref = db.Ref("dbtest/datag");
 
 			// get data (was set 'Set' method) and display
 			this.TestLabel.Content = (await dbref.GetObjectAsync<TestStruct>()).Text;

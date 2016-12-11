@@ -495,7 +495,10 @@ namespace Firebase.Windows.Database
 			promise.Resolved += (sender, e) =>
 			{
 				var value = e.Reference.InvokeMethodToReference("val");
-				result = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(value.GetJsonValue());
+				if (value != null)
+					result = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(value.GetJsonValue());
+				else
+					result = default(T);
 			};
 			promise.StartReceiving();
 			await promise.WaitForStatusChangedAsync();
@@ -516,7 +519,10 @@ namespace Firebase.Windows.Database
 				var values = e.Reference.InvokeMethodToArrayFromJson("val");
 				foreach (var value in values)
 				{
-					result.Add(Newtonsoft.Json.JsonConvert.DeserializeObject<T>(value.GetJsonValue()));
+					if (value != null)
+						result.Add(Newtonsoft.Json.JsonConvert.DeserializeObject<T>(value.GetJsonValue()));
+					else
+						result.Add(default(T));
 				}
 			};
 			promise.StartReceiving();

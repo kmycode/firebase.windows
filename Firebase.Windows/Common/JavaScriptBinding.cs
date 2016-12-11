@@ -82,7 +82,14 @@ namespace Firebase.Windows.Common
 #if DEBUG
 			System.Diagnostics.Debug.WriteLine(script);
 #endif
-			return this._javaScriptExecutor.ExecuteScript(script);
+			try
+			{
+				return this._javaScriptExecutor.ExecuteScript(script);
+			}
+			catch (Exception e)
+			{
+				throw new JavaScriptBindingException("JavaScript error occured when run script '" + script + "'", e);
+			}
 		}
 
 		/// <summary>
