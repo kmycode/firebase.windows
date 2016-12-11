@@ -84,6 +84,52 @@ namespace Firebase.Windows.Common
 		}
 
 		/// <summary>
+		/// JavaScript array to JavaScriptObjectReference array
+		/// </summary>
+		/// <param name="variableName">array variable name</param>
+		/// <returns>reference array</returns>
+		internal JavaScriptObjectReferenceCollection ExecuteScriptToReferenceArray(string variableName)
+		{
+			var array = new JavaScriptObjectReferenceCollection();
+
+			// for each array
+			int length = int.Parse((string)this.ExecuteScript($"return \"\" + {variableName}.length"));
+			for (int i = 0; i < length; i++)
+			{
+				var reference = new JavaScriptObjectReference();
+				reference.SetValue($"{variableName}[{i}]");
+				array.Add(reference);
+			}
+
+			return array;
+		}
+
+		/// <summary>
+		/// JavaScript json object to JavaScriptObjectReference array
+		/// </summary>
+		/// <param name="variableName">array variable name</param>
+		/// <returns>reference array</returns>
+		internal JavaScriptObjectReferenceCollection ExecuteScriptToReferenceArrayFromJson(string variableName)
+		{
+			// convert json to javascript array
+			var arrayReference = new JavaScriptObjectReference();
+			arrayReference.SetValue("[]");
+			this.ExecuteScript($@"for (key in {variableName}) {{ variables.{arrayReference.VariableName}.push({variableName}[key]); }}");
+
+			return this.ExecuteScriptToReferenceArray(arrayReference);
+		}
+
+		/// <summary>
+		/// JavaScript array to JavaScriptObjectReference array
+		/// </summary>
+		/// <param name="reference">array variable reference</param>
+		/// <returns>reference array</returns>
+		internal JavaScriptObjectReferenceCollection ExecuteScriptToReferenceArray(JavaScriptObjectReference reference)
+		{
+			return this.ExecuteScriptToReferenceArray("variables." + reference.VariableName);
+		}
+
+		/// <summary>
 		/// Execute JavaScript async
 		/// </summary>
 		/// <param name="script">Script string</param>

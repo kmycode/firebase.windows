@@ -15,6 +15,38 @@ namespace Firebase.Windows.Common
 
 		private JavaScriptObjectReferenceWatcher ResultWatcher;
 
+		public string StringValue
+		{
+			get
+			{
+				return this.ValueReference.GetValue();
+			}
+		}
+
+		public string Result
+		{
+			get
+			{
+				return this.ResultReference.GetValue();
+			}
+		}
+
+		public bool IsResolve
+		{
+			get
+			{
+				return this.Result == "resolve";
+			}
+		}
+
+		public bool IsReject
+		{
+			get
+			{
+				return this.Result == "reject";
+			}
+		}
+
 		internal FirebasePromise(JavaScriptObjectReference reference)
 		{
 			this.ErrorReference = new JavaScriptObjectReference(reference.JSBinding);
@@ -80,6 +112,28 @@ namespace Firebase.Windows.Common
 			}
 
 			return hit;
+		}
+
+		/// <summary>
+		/// wait until status changed
+		/// </summary>
+		public void WaitForStatusChanged()
+		{
+			while (this.ResultWatcher != null)
+			{
+				Task.Delay(10).Wait();
+			}
+		}
+
+		/// <summary>
+		/// wait until status changed
+		/// </summary>
+		public async Task WaitForStatusChangedAsync()
+		{
+			while (this.ResultWatcher != null)
+			{
+				await Task.Delay(10);
+			}
 		}
 
 		/// <summary>

@@ -33,17 +33,41 @@ namespace Firebase.Windows.Test.SamplePage
 			//this.SignOut();
 		}
 
-		private void SignIn()
+		private async void SignIn()
 		{
 			//var promise = await FirebaseApp.Default.Auth().SignInWithTwitterAsync();
-			//var promise = FirebaseApp.Default.Auth().CreateUserWithEmailAndPassword("tt@kmycode.net", "Asuka786");
-			var promise = FirebaseApp.Default.Auth().SignInWithEmailAndPassword("tt@kmycode.net", "Asuka786");
+			//var promise = FirebaseApp.Default.Auth().CreateUserWithEmailAndPassword("___", "Asuka786");
+			//var promise = FirebaseApp.Default.Auth().SignInWithEmailAndPassword("___", "Asuka786");
+			var promise = FirebaseApp.Default.Auth().SignInAnonymously();//FirebaseApp.Default.Auth().GetEmailAndPasswordCredential("___", "Asuka786");
+			//var promise = credential.SignIn();
 			promise.Rejected += (sender, e) => this.Dispatcher.Invoke(() => this.TestLabel.Content = "認証失敗: " + e.ErrorCode);
-			promise.Resolved += (sender, e) =>
+			promise.Resolved += async (sender, e) =>
 			{
-				this.Dispatcher.Invoke(() => this.TestLabel.Content = FirebaseApp.Default.Auth().CurrentUser.DisplayName);
+
+				//var data = FirebaseApp.Default.Auth().CurrentUser.ProviderDatas;
 			};
 			promise.StartReceiving();
+
+			promise.WaitForStatusChanged();
+			if (!promise.IsResolve) return;
+
+			this.Dispatcher.Invoke(() => this.TestLabel.Content = FirebaseApp.Default.Auth().CurrentUser.DisplayName);
+		}
+
+		private async void Link()
+		{
+			var newCredential = await FirebaseApp.Default.Auth().GetTwitterCredentialAsync();
+			var linkPromise = FirebaseApp.Default.Auth().CurrentUser.Link(newCredential);
+			linkPromise.Resolved += (ss, ee) =>
+			{
+				this.Dispatcher.Invoke(() => this.TestLabel.Content = "リンク成功");
+			};
+			linkPromise.Rejected += (ss, ee) =>
+			{
+				this.Dispatcher.Invoke(() => this.TestLabel.Content = "リンク失敗: " + ee.ErrorCode);
+				FirebaseApp.Default.Auth().CurrentUser.Delete();
+			};
+			linkPromise.StartReceiving();
 		}
 
 		private void SignOut()

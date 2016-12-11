@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Firebase.Windows.Auth;
 using Firebase.Windows.Common;
+using Firebase.Windows.Database;
 using Firebase.Windows.Exceptions;
 
 namespace Firebase.Windows.Core
@@ -13,7 +14,7 @@ namespace Firebase.Windows.Core
 	/// <summary>
 	/// Firebaseアプリのエントリーポイント
 	/// </summary>
-	public class FirebaseApp
+	public class FirebaseApp : IDisposable
 	{
 		private static FirebaseApp _default;
 		public static FirebaseApp Default
@@ -155,14 +156,19 @@ namespace Firebase.Windows.Core
 			return new FirebaseAuth(this.Reference.InvokeMethodToReference("auth"));
 		}
 
-		public object Database()
+		public FirebaseDatabase Database()
 		{
-			throw new NotImplementedException();
+			return new FirebaseDatabase(this.Reference.InvokeMethodToReference("database"));
 		}
 
 		public object Storage()
 		{
 			throw new NotImplementedException();
+		}
+
+		public void Dispose()
+		{
+			JavaScriptBinding.Default.Dispose();
 		}
 	}
 }

@@ -44,7 +44,9 @@ namespace Firebase.Windows.Auth
 		{
 			get
 			{
-				return new FirebaseUser(this.Reference.GetPropertyToReference("currentUser"));
+				var reference = this.Reference.GetPropertyToReference("currentUser");
+				if (reference == null || reference.IsNull) return null;
+				return new FirebaseUser(reference);
 			}
 		}
 
@@ -81,12 +83,33 @@ namespace Firebase.Windows.Auth
 		}
 
 		/// <summary>
+		/// Sign in with email and password account to get credential
+		/// </summary>
+		/// <returns>Firebase credential instance</returns>
+		public FirebaseCredential GetEmailAndPasswordCredential(string email, string password)
+		{
+			var credential = new JavaScriptObjectReference();
+			credential.SetValue($"firebase.auth.EmailAuthProvider.credential('{email}', '{password}')");
+			return new FirebaseEmailAndPasswordCredential(credential);
+		}
+
+		/// <summary>
 		/// Sign in with twitter account
 		/// </summary>
 		/// <returns>FirebasePromise callbacks</returns>
 		public async Task<FirebasePromise> SignInWithTwitterAsync()
 		{
-			return await this.SignInWithAuthServiceAsync(
+			var credential = await this.GetTwitterCredentialAsync();
+			return credential.SignIn();
+		}
+
+		/// <summary>
+		/// Sign in with twitter account to get credential
+		/// </summary>
+		/// <returns>Firebase credential instance</returns>
+		public async Task<FirebaseCredential> GetTwitterCredentialAsync()
+		{
+			return await this.AuthServiceAsync(
 				providerName: "TwitterAuthProvider",
 				serviceDomanin: "twitter.com",
 				credentialGetter: (e) =>
@@ -98,7 +121,7 @@ namespace Firebase.Windows.Auth
 					var credential = new JavaScriptObjectReference();
 					credential.SetValue($"firebase.auth.TwitterAuthProvider.credential('{twitterToken}', '{twitterSecret}')");
 
-					return credential;
+					return new FirebaseTwitterCredential(credential);
 				}
 				);
 		}
@@ -109,7 +132,17 @@ namespace Firebase.Windows.Auth
 		/// <returns>FirebasePromise callbacks</returns>
 		public async Task<FirebasePromise> SignInWithGithubAsync()
 		{
-			return await this.SignInWithAuthServiceAsync(
+			var credential = await this.GetGithubCredentialAsync();
+			return credential.SignIn();
+		}
+
+		/// <summary>
+		/// Sign in with github account to get credential
+		/// </summary>
+		/// <returns>Firebase credential instance</returns>
+		public async Task<FirebaseCredential> GetGithubCredentialAsync()
+		{
+			return await this.AuthServiceAsync(
 				providerName: "GithubAuthProvider",
 				serviceDomanin: "github.com",
 				credentialGetter: (e) =>
@@ -120,7 +153,7 @@ namespace Firebase.Windows.Auth
 					var credential = new JavaScriptObjectReference();
 					credential.SetValue($"firebase.auth.GithubAuthProvider.credential('{githubToken}')");
 
-					return credential;
+					return new FirebaseGithubCredential(credential);
 				}
 				);
 		}
@@ -131,7 +164,17 @@ namespace Firebase.Windows.Auth
 		/// <returns>FirebasePromise callbacks</returns>
 		public async Task<FirebasePromise> SignInWithFacebookAsync()
 		{
-			return await this.SignInWithAuthServiceAsync(
+			var credential = await this.GetFacebookCredentialAsync();
+			return credential.SignIn();
+		}
+
+		/// <summary>
+		/// Sign in with facebook account to get credential
+		/// </summary>
+		/// <returns>Firebase credential instance</returns>
+		public async Task<FirebaseCredential> GetFacebookCredentialAsync()
+		{
+			return await this.AuthServiceAsync(
 				providerName: "FacebookAuthProvider",
 				serviceDomanin: "facebook.com",
 				credentialGetter: (e) =>
@@ -142,15 +185,15 @@ namespace Firebase.Windows.Auth
 					var credential = new JavaScriptObjectReference();
 					credential.SetValue($"firebase.auth.FacebookAuthProvider.credential('{facebookToken}')");
 
-					return credential;
+					return new FirebaseFacebookCredential(credential);
 				}
 				);
 		}
 
-		private async Task<FirebasePromise> SignInWithAuthServiceAsync(
+		private async Task<FirebaseCredential> AuthServiceAsync(
 			string providerName,
 			string serviceDomanin,
-			Func<FirebasePromise.ResolvedEventArgs, JavaScriptObjectReference> credentialGetter
+			Func<FirebasePromise.ResolvedEventArgs, FirebaseCredential> credentialGetter
 			)
 		{
 			var options = this.App.Options;
@@ -209,14 +252,14 @@ namespace Firebase.Windows.Auth
 			bool isAuthStatusChanged = false;
 
 			// get twitter token and secret
-			FirebasePromise promise = null;
+			FirebaseCredential credential = null;
 			authPromise.Resolved += (sender, e) =>
 			{
-				var credential = credentialGetter(e);
+				credential = credentialGetter(e);
 
-				var promiseReference = new JavaScriptObjectReference();
-				promiseReference.SetValue($"firebase.auth().signInWithCredential(variables.{credential.VariableName})");
-				promise = new FirebasePromise(promiseReference);
+				//var promiseReference = new JavaScriptObjectReference();
+				//promiseReference.SetValue($"firebase.auth().signInWithCredential(variables.{credential.VariableName})");
+				//promise = new FirebasePromise(promiseReference);
 
 				isAuthStatusChanged = true;
 				driver.Dispose();
@@ -244,7 +287,7 @@ namespace Firebase.Windows.Auth
 				await Task.Delay(10);
 			}
 
-			return promise;
+			return credential;
 		}
 
 		/// <summary>
@@ -257,12 +300,83 @@ namespace Firebase.Windows.Auth
 		}
 
 		/// <summary>
+		/// Sign in with already gotten credential object
+		/// </summary>
+		/// <param name="credential">Firebase credential</param>
+		/// <returns>FirebasePromise callbacks</returns>
+		public FirebasePromise SignInWithCredential(FirebaseCredential credential)
+		{
+			var promiseReference = this.Reference.InvokeMethodToReference("signInWithCredential", "variables." + credential.Reference.VariableName);
+			return new FirebasePromise(promiseReference);
+		}
+
+		/// <summary>
+		/// Sign in with custom token key
+		/// </summary>
+		/// <param name="token">custom token</param>
+		/// <returns>FirebasePromise callbacks</returns>
+		public FirebasePromise SignInWithCustomToken(string token)
+		{
+			var promiseReference = this.Reference.InvokeMethodToReference("signInWithCustomToken",$"'{token}'");
+			return new FirebasePromise(promiseReference);
+		}
+
+		/// <summary>
 		/// Sign out any auth
 		/// </summary>
 		/// <returns>FirebasePromise callbacks</returns>
 		public FirebasePromise SignOut()
 		{
 			return new FirebasePromise(this.Reference.InvokeMethodToReference("signOut"));
+		}
+
+		/// <summary>
+		/// send email to reset password
+		/// </summary>
+		/// <param name="email">send to email address</param>
+		/// <returns>FirebasePromise callbacks</returns>
+		public FirebasePromise SendPasswordResetEmail(string email)
+		{
+			return new FirebasePromise(this.Reference.InvokeMethodToReference("sendPasswordResetEmail", $"'{email}'"));
+		}
+
+		/// <summary>
+		/// verify password reset code
+		/// </summary>
+		/// <param name="password">verify password</param>
+		/// <returns>FirebasePromise callbacks</returns>
+		public FirebasePromise VerifyPasswordResetCode(string password)
+		{
+			return new FirebasePromise(this.Reference.InvokeMethodToReference("verifyPasswordResetCode", $"'{password}'"));
+		}
+
+		/// <summary>
+		/// confirm new password change
+		/// </summary>
+		/// <returns>FirebasePromise callbacks</returns>
+		public FirebasePromise ConfirmPasswordReset(string code, string newPassword)
+		{
+			return new FirebasePromise(this.Reference.InvokeMethodToReference("confirmPasswordReset", $"'{code}', '{newPassword}'"));
+		}
+
+		/// <summary>
+		/// apply action code
+		/// </summary>
+		/// <param name="code">action code sent to the user</param>
+		/// <returns>FirebasePromise callbacks</returns>
+		public FirebasePromise ApplyActionCode(string code)
+		{
+			return new FirebasePromise(this.Reference.InvokeMethodToReference("applyActionCode", $"'{code}'"));
+		}
+
+		/// <summary>
+		/// check action code
+		/// </summary>
+		/// <param name="code">action code sent to the user</param>
+		/// <returns>FirebasePromise callbacks</returns>
+		public FirebasePromise CheckActionCode(string code)
+		{
+			return new FirebasePromise(this.Reference.InvokeMethodToReference("checkActionCode", $"'{code}'"));
 		}
 	}
 }

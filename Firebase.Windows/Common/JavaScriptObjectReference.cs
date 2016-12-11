@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,6 +58,11 @@ namespace Firebase.Windows.Common
 			return (string)this.JSBinding.ExecuteScript("return \"\" + variables." + this.VariableName);
 		}
 
+		internal string GetJsonValue()
+		{
+			return (string)this.JSBinding.ExecuteScript("return \"\" + JSON.stringify(variables." + this.VariableName + ")");
+		}
+
 		internal void SetProperty(string propertyName, string valueScript)
 		{
 			this.JSBinding.ExecuteScript("variables." + this.VariableName + "." + propertyName + " = " + valueScript + ";");
@@ -70,6 +76,11 @@ namespace Firebase.Windows.Common
 		internal bool GetPropertyToBool(string propertyName)
 		{
 			return (bool)this.JSBinding.ExecuteScript("return \"\" + variables." + this.VariableName + "." + propertyName);
+		}
+
+		internal JavaScriptObjectReferenceCollection GetPropertyToArray(string propertyName)
+		{
+			return this.JSBinding.ExecuteScriptToReferenceArray("variables." + this.VariableName + "." + propertyName);
 		}
 
 		internal JavaScriptObjectReference GetPropertyToReference(string propertyName)
@@ -91,6 +102,26 @@ namespace Firebase.Windows.Common
 			return reference.IsNull ? null : reference;
 		}
 
+		internal bool InvokeMethodToBool(string methodName)
+		{
+			return (bool)this.JSBinding.ExecuteScript("return variables." + this.VariableName + "." + methodName + "();");
+		}
+
+		internal string InvokeMethodToString(string methodName)
+		{
+			return (string)this.JSBinding.ExecuteScript("return variables." + this.VariableName + "." + methodName + "();");
+		}
+
+		internal JavaScriptObjectReferenceCollection InvokeMethodToArray(string methodName)
+		{
+			return this.JSBinding.ExecuteScriptToReferenceArray("variables." + this.VariableName + "." + methodName + "()");
+		}
+
+		internal JavaScriptObjectReferenceCollection InvokeMethodToArrayFromJson(string methodName)
+		{
+			return this.JSBinding.ExecuteScriptToReferenceArrayFromJson("variables." + this.VariableName + "." + methodName + "()");
+		}
+
 		internal void InvokeMethod(string methodName, string paramScript)
 		{
 			this.JSBinding.ExecuteScript("variables." + this.VariableName + "." + methodName + "(" + paramScript + ");");
@@ -102,5 +133,22 @@ namespace Firebase.Windows.Common
 			this.JSBinding.ExecuteScript("variables." + reference.VariableName + " = variables." + this.VariableName + "." + methodName + "(" + paramScript + ");");
 			return reference.IsNull ? null : reference;
 		}
+
+		internal bool InvokeMethodToBool(string methodName, string paramScript)
+		{
+			return (bool)this.JSBinding.ExecuteScript("return variables." + this.VariableName + "." + methodName + "(" + paramScript + ");");
+		}
+
+		internal string InvokeMethodToString(string methodName, string paramScript)
+		{
+			return (string)this.JSBinding.ExecuteScript("return variables." + this.VariableName + "." + methodName + "(" + paramScript + ");");
+		}
+
+		internal JavaScriptObjectReferenceCollection InvokeMethodToArray(string methodName, string paramScript)
+		{
+			return this.JSBinding.ExecuteScriptToReferenceArray("variables." + this.VariableName + "." + methodName + "(" + paramScript + ")");
+		}
 	}
+
+	internal class JavaScriptObjectReferenceCollection : Collection<JavaScriptObjectReference> { }
 }

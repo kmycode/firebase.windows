@@ -58,6 +58,9 @@
     <Compile Include="SamplePage\Sample1_Auth.xaml.cs">
       <DependentUpon>Sample1_Auth.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SamplePage\Sample2_Database.xaml.cs">
+      <DependentUpon>Sample2_Database.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -71,6 +74,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="SamplePage\Sample1_Auth.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SamplePage\Sample2_Database.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

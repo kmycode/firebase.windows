@@ -34,6 +34,7 @@ namespace Firebase.Windows.Test
 			});
 
 			InitializeComponent();
+			this.Closed += (sender, e) => FirebaseApp.Default.Dispose();
 		}
 	}
 }
